@@ -7,7 +7,7 @@ The book material provides a programmer's view of how computer systems execute p
 ## Lab Assignments
 
 
-- [x] [Data Lab](https://github.com/notDroid/CS-APP/tree/main/Lab1-DataLab)
+- [x] [Data Lab](https://github.com/notDroid/CS-APP/tree/main/Lab1-DataLab) (Chapter 2: Representing and Manipulating Information)
 - [ ] [Bomb Lab]()
 - [ ] [Attack Lab]()
 - [ ] [Buffer Lab]()
