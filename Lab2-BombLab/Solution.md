@@ -80,7 +80,7 @@ int func4(int x, int a, int b) {
 - Defused if this created string is "flyers".
 - Need to find input characters that map to the letters in flyers.
   - Examining the table of characters at 0x4024b0 from an offset of 0 to 15 we get:
-![Table Values](image.png)
+![Table Values](https://github.com/user-attachments/assets/cc97b865-3d64-4060-8cc6-f5def6902d77)
 
 | Offset   | Output Char | Ascii Value | Input Char |
 | -------- | ------- | ------- | ------- |
