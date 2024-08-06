@@ -1,12 +1,12 @@
-## Solutions With Notes
-### Phase 1
+# Solutions With Notes
+## Phase 1
 - Call <strings_not_equal>
 - Compare string length (<string_length>), correct length: 52
 - The argument for this called is initially in %rbp, examining %rbp gives:
 
 **Answer**: "Border relations with Canada have never been better."
 
-### Phase 2
+## Phase 2
 - Call <read_six_numbers>, then call \<__isoc99_sscanf@plt>
 - If %eax <= 5 explode. scanf returns the # of inputs in the correct format.
 - Therefore we need 6 spaced numbers.
@@ -33,7 +33,7 @@ void phase_2(char *input_line) {
     }
 }
 ```
-### Phase 3
+## Phase 3
 - Call scanf, make sure number of inputs > 1.
   - %rdi = input line
   - %rsi = some string pointer, format string: "%d %d"
@@ -46,7 +46,7 @@ void phase_2(char *input_line) {
 
 **Answer**: "0 207"
 
-### Phase 4
+## Phase 4
 - Call scanf and confirm 2 inputs.
   - Format string: "%d %d"
   - First output loc: %rsp + 8, int *xp
@@ -74,7 +74,7 @@ int func4(int x, int a, int b) {
 }
 ```
 
-### Phase 5
+## Phase 5
 - Check that input string length = 6.
 - Go through a loop to construct some string from the input string.
 - Defused if this created string is "flyers".
@@ -105,7 +105,7 @@ void decode_string(char *input, char *output){
 }
 ```
 
-### Phase 6
+## Phase 6
 - Call read_six_numbers, save in int nums[6].
 - Make sure there are no duplicates by running a nested for loop, also check that no numbers are less than or equal to 0 or greater than 6.
 - Flip each value in nums: 7 - nums[i].
@@ -183,7 +183,7 @@ void phase_6(char *input) {
 }
 ```
 
-### Secret Phase
+## Secret Phase
 - After 6 input lines have been read (after phase 6 complete) the phase_defused function skips a conditional jump.
 - Then it reads a line from some location, printing the string at this location gives "7 0", the the phase 4 solution. It checks if this line has 3 entries first 2 numbers and then a string and if it does have this string it compares is to the string "DrEvil" and if they're the same it calls the secret_phase.
 - First reads a number from stdin x, if x is 0 or greater than 0x3e9 then the bomb blows up.
