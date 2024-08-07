@@ -141,7 +141,7 @@ a2 19 40 00 00 00 00 00 /* movq %rax, %rdi */
 d6 19 40 00 00 00 00 00 /* goto add_xy */
 
 a2 19 40 00 00 00 00 00 /* movq %rax, %rdi */
-ec 17 40 00 00 00 00 00 /* goto touch3 */
+fa 18 40 00 00 00 00 00 /* goto touch3 */
 
 /* cookie string */
 35 39 62 39 39 37 66 61
