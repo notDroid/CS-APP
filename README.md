@@ -13,7 +13,7 @@ All labs are avaliable on the [cs:app website](https://csapp.cs.cmu.edu/).
 - [x] Lab 3 [**Attack Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab3-AttackLab): Students are given a pair of unique custom-generated x86-64 binary executables, called targets, that have buffer overflow bugs. One target is vulnerable to code injection attacks. The other is vulnerable to return-oriented programming attacks. Students are asked to modify the behavior of the targets by developing exploits based on either code injection or return-oriented programming. This lab teaches the students about the stack discipline and teaches them about the danger of writing code that is vulnerable to buffer overflow attacks.
 
 ![image](https://github.com/user-attachments/assets/6ce4346f-8978-4d5d-b11b-529a293d8ba4)
-![image](https://github.com/user-attachments/assets/79330a8c-f405-439f-b498-625611f8d60f)
+![image](https://github.com/user-attachments/assets/82de30c7-6e24-4390-b6f1-b5b03ddefc55)
 - [ ] [Architecture Lab]()
 - [ ] [Cache Lab]()
 - [ ] [Performance Lab]()
