@@ -42,7 +42,7 @@ team_t team = {
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~0x7)
 
 
-#define SIZE_T_SIZE (ALIGN(sizeof(size_t)))
+#define SIZE_T_SIZE (sizeof(size_t))
 
 // Basic Header and Footer Information Control
 #define PACK(size, alloc) (size | alloc)
@@ -53,9 +53,10 @@ team_t team = {
 #define GET_ALLOC(p) ((*((size_t *) p)) & 0x1)
 #define SET_ALLOC(p, alloc) *((size_t *) p) = ((*((size_t *) p)) & ~0x1) | alloc
 #define FTPT(p, size) (((char *) p) + size - 2 * SIZE_T_SIZE)
+#define LFPT(p) (((char *) p) - 2 * SIZE_T_SIZE) 
 
 #define NEXT_BLOCK(p, size) (((char *) p) + size)
-#define PREV_BLOCK(p, size) (((char *) p) - size)
+#define PREV_BLOCK(p, prev_size) (((char *) p) - prev_size)
 
 // Added functions
 void coalesce(void *p);
@@ -72,9 +73,9 @@ int mm_init(void)
 	    return -1;
 
     // First word ignored for double word alignment
-    PUT(NEXT_BLOCK(p, 1), 8 | 1); // Header of left boundary
-    PUT(NEXT_BLOCK(p, 2), 8 | 1); // Footer of left boundary
-    PUT(NEXT_BLOCK(p, 3), 1); // Header of right boundary
+    PUT(NEXT_BLOCK(p, 1 * SIZE_T_SIZE), PACK(2 * SIZE_T_SIZE, 1)); // Header of left boundary
+    PUT(NEXT_BLOCK(p, 2 * SIZE_T_SIZE), PACK(2 * SIZE_T_SIZE, 1)); // Footer of left boundary
+    PUT(NEXT_BLOCK(p, 3 * SIZE_T_SIZE), PACK(0, 1)); // Header of right boundary
 
     return 0;
 }
@@ -87,27 +88,31 @@ void *mm_malloc(size_t size)
 {
     void *p;
     int newsize = ALIGN(size + 2 * SIZE_T_SIZE); // Allocate header + block size + footer, then round up for alignment
-    int meta_data = PACK(newsize, 1);
+    int meta_data;
+    // printf("Allocating new memory, size: %d\n", newsize);
 
     // Search free implicit list
     p = search_free_list(newsize);
     if (p != NULL) {
+        // printf("Found from free list: %p\n", p);
         SET_ALLOC(HDPT(p), 1);
-        SET_ALLOC(FTPT(p, GET_SIZE(p)), 1);
+        SET_ALLOC(FTPT(p, GET_SIZE(HDPT(p))), 1);
         return p;
     }
 
     // Get new memory
     p = mem_sbrk(newsize);
-    if (p == (void *)-1)
+    if (p == (void *)-1) 
 	    return NULL;
 
     // Set header + footer
+    meta_data = PACK(newsize, 1);
     PUT(HDPT(p), meta_data);
     PUT(FTPT(p, newsize), meta_data);
 
     // Set 0 allocated header at the end
     PUT(HDPT(NEXT_BLOCK(p, newsize)), 1);
+    // printf("New memory allocated: %p\n", p);
     return p;
 }
 
@@ -116,10 +121,12 @@ void *mm_malloc(size_t size)
  */
 void mm_free(void *ptr)
 {
+    // printf("Freeing Memory: %p\n", ptr);
     // Mark deallocated
     SET_ALLOC(HDPT(ptr), 0);
-    SET_ALLOC(FTPT(ptr, GET_SIZE(ptr)), 0);
+    SET_ALLOC(FTPT(ptr, GET_SIZE(HDPT(ptr))), 0);
 
+    // printf("Freed Memory\n");
     // Combine neighbors
     coalesce(ptr);
     return;
@@ -151,10 +158,12 @@ void *search_free_list(size_t size) {
     char *p = (char *) mem_heap_lo();
     char *end = (char *) mem_heap_hi();
 
-    p += 16; // Start at the first real block
+    p += 4 * SIZE_T_SIZE; // Start at the first real block
+    // printf("Start point: %p, end point: %p\n", p, end);
     while (p < end) {
         block_size = GET_SIZE(HDPT(p));
         alloc = GET_ALLOC(HDPT(p));
+        // printf("current location: %p, block size: %d, allocated: %d\n", p, block_size, alloc);
 
         // Return if end of list reached
         if (block_size == 0)
@@ -171,5 +180,30 @@ void *search_free_list(size_t size) {
 
 // coalesce - combine free neighbors
 void coalesce(void *p) {
+    // printf("Coalesceing\n");
+    size_t size = GET_SIZE(HDPT(p));
+    size_t newsize = size;
+    char *left = PREV_BLOCK(p, GET_SIZE(LFPT(p)));
+    char *right = NEXT_BLOCK(p, size);
+    int left_free = !GET_ALLOC(HDPT(left));
+    int right_free = !GET_ALLOC(HDPT(right));
+    
+    if (left_free) {
+        newsize += GET_SIZE(HDPT(left));
+    }
+    if (right_free) { 
+        newsize += GET_SIZE(HDPT(right));
+    }
+    
+    if (left_free)
+        PUT(HDPT(left), newsize);
+    else
+        PUT(HDPT(p), newsize);
+
+    if (right_free)
+        PUT(FTPT(right, GET_SIZE(HDPT(right))), newsize);
+    else
+        PUT(FTPT(p, size), newsize);
+
     return;
 }
