@@ -22,7 +22,7 @@ All labs are avaliable on the [cs:app website](https://csapp.cs.cmu.edu/).
 ![image](https://github.com/user-attachments/assets/bd3ef8cc-79cb-46a4-ad8a-e551fc8ad443)
 
 - [ ] [Cache Lab]()
-- [ ] [Performance Lab]()
 - [ ] [Shell Lab]()
-- [ ] [Malloc Lab]()
+- [ ] Lab 7 [**Malloc Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab7-MallocLab): Students implement their own versions of malloc, free, and realloc. This lab gives students a clear understanding of data layout and organization, and requires them to evaluate different trade-offs between space and time efficiency. One of our favorite labs. When students finish this one, they really understand pointers!
+
 - [ ] [Proxy Lab]()
