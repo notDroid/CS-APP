@@ -60,6 +60,7 @@ team_t team = {
 
 // Added functions
 void coalesce(void *p);
+void *realloc_coalesce(void *p, size_t size);
 void place(void *p, size_t size);
 void split(void *p, size_t new_size, size_t old_size);
 void *search_free_list(size_t size);
@@ -141,12 +142,15 @@ void *mm_realloc(void *ptr, size_t size)
     void *oldptr = ptr;
     void *newptr;
     size_t copySize;
-    
     // Case 1, current block is enough
-    if (ALIGN(size + 2 * SIZE_T_SIZE) <= GET_SIZE(HDPT(ptr)))
-        return ptr;
+    if (ALIGN(size + 2 * SIZE_T_SIZE) <= GET_SIZE(HDPT(oldptr)))
+        return oldptr;
 
-    // Case 2, Neighbors have enough free memory (Not implemented)
+    // Case 2, Neighbors have enough free memory
+    newptr = realloc_coalesce(ptr, size);
+    if (newptr != NULL) {
+        return newptr;
+    }
 
     // Case 3, call malloc
     newptr = mm_malloc(size);
@@ -212,6 +216,73 @@ void coalesce(void *p) {
     PUT(HDPT(p), PACK(new_size, 0));
     PUT(FTPT(p, new_size), PACK(new_size, 0));
     return;
+}
+
+// realloc coalesce - combine free neighbors
+void *realloc_coalesce(void *p, size_t size) {
+    size_t old_size = GET_SIZE(HDPT(p));
+    size_t new_size = old_size;
+    char *left_footer = LFPT(p);
+    char *right_header = HDPT(NEXT_BLOCK(p, old_size));
+
+    int left_size, right_size;
+    int left_free = !GET_ALLOC(left_footer);
+    int right_free = !GET_ALLOC(right_header);
+
+    // Case 1: neither are free
+    if (!left_free && !right_free) {
+        return NULL;
+    }
+
+    // Case 2: both are free
+    if (left_free && right_free) {
+        left_size = GET_SIZE(left_footer);
+        right_size = GET_SIZE(right_header);
+
+        // Subcase 1: not enough combined space
+        if (old_size + left_size + right_size < size) {
+            return NULL;
+        }
+        // Subcase 2: we need both
+        if (!(old_size + left_size >= size) && !(old_size + right_size >= size)) {
+            new_size += left_size + right_size;
+            p = PREV_BLOCK(p, left_size);
+        }
+        // Subcase 3: we only need one, choose least one
+        else if (right_size <= left_size) { // right is smaller
+            new_size += right_size;
+        }
+        else { // left is smaller
+            new_size += left_size;
+            p = PREV_BLOCK(p, left_size);
+        }
+    }
+    // Case 3: only right is free
+    else if (right_free) {
+        right_size = GET_SIZE(right_header);
+        // Subcase 1: not enough combined space
+        if (old_size + right_size < size) {
+            return NULL;
+        }
+        // Subcase 2: combine right
+        new_size += right_size;
+    }
+    // Case 4: only left is free
+    else {
+        left_size = GET_SIZE(left_footer);
+        // Subcase 1: not enough combined space
+        if (old_size + left_size < size) {
+            return NULL;
+        }
+        // Subcase 2: combine left
+        new_size += left_size;
+        p = PREV_BLOCK(p, left_size);
+    }
+
+    // Combine and allocate
+    PUT(HDPT(p), PACK(new_size, 1));
+    PUT(FTPT(p, new_size), PACK(new_size, 1));
+    return p;
 }
 
 
