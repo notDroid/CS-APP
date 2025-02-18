@@ -60,6 +60,8 @@ team_t team = {
 
 // Added functions
 void coalesce(void *p);
+void place(void *p, size_t size);
+void split(void *p, size_t new_size, size_t old_size);
 void *search_free_list(size_t size);
 
 /* 
@@ -87,31 +89,30 @@ int mm_init(void)
 void *mm_malloc(size_t size)
 {
     void *p;
-    int newsize = ALIGN(size + 2 * SIZE_T_SIZE); // Allocate header + block size + footer, then round up for alignment
+    int new_size = ALIGN(size + 2 * SIZE_T_SIZE); // Allocate header + block size + footer, then round up for alignment
     int meta_data;
-    // printf("Allocating new memory, size: %d\n", newsize);
+    // printf("Allocating new memory, size: %d\n", new_size);
 
     // Search free implicit list
-    p = search_free_list(newsize);
+    p = search_free_list(new_size);
     if (p != NULL) {
         // printf("Found from free list: %p\n", p);
-        SET_ALLOC(HDPT(p), 1);
-        SET_ALLOC(FTPT(p, GET_SIZE(HDPT(p))), 1);
+        place(p, new_size);
         return p;
     }
 
     // Get new memory
-    p = mem_sbrk(newsize);
+    p = mem_sbrk(new_size);
     if (p == (void *)-1) 
 	    return NULL;
 
     // Set header + footer
-    meta_data = PACK(newsize, 1);
+    meta_data = PACK(new_size, 1);
     PUT(HDPT(p), meta_data);
-    PUT(FTPT(p, newsize), meta_data);
+    PUT(FTPT(p, new_size), meta_data);
 
     // Set 0 allocated header at the end
-    PUT(HDPT(NEXT_BLOCK(p, newsize)), 1);
+    PUT(HDPT(NEXT_BLOCK(p, new_size)), 1);
     // printf("New memory allocated: %p\n", p);
     return p;
 }
@@ -141,14 +142,24 @@ void *mm_realloc(void *ptr, size_t size)
     void *newptr;
     size_t copySize;
     
+    // Case 1, current block is enough
+    if (ALIGN(size + 2 * SIZE_T_SIZE) <= GET_SIZE(HDPT(ptr)))
+        return ptr;
+
+    // Case 2, Neighbors have enough free memory (Not implemented)
+
+    // Case 3, call malloc
     newptr = mm_malloc(size);
     if (newptr == NULL)
       return NULL;
+
+    // Copy memory
     copySize = *(size_t *)((char *)oldptr - SIZE_T_SIZE);
     if (size < copySize)
       copySize = size;
     memcpy(newptr, oldptr, copySize);
     mm_free(oldptr);
+
     return newptr;
 }
 
@@ -170,7 +181,7 @@ void *search_free_list(size_t size) {
             return NULL;
         // Return if large enough free block
         if (!alloc && (block_size >= size))
-            return p;
+            return (void *) p;
         p = NEXT_BLOCK(p, block_size);
     }
 
@@ -182,28 +193,48 @@ void *search_free_list(size_t size) {
 void coalesce(void *p) {
     // printf("Coalesceing\n");
     size_t size = GET_SIZE(HDPT(p));
-    size_t newsize = size;
+    size_t new_size = size;
     char *left = PREV_BLOCK(p, GET_SIZE(LFPT(p)));
     char *right = NEXT_BLOCK(p, size);
     int left_free = !GET_ALLOC(HDPT(left));
     int right_free = !GET_ALLOC(HDPT(right));
     
     if (left_free) {
-        newsize += GET_SIZE(HDPT(left));
+        new_size += GET_SIZE(HDPT(left));
+        p = PREV_BLOCK(p, GET_SIZE(LFPT(p)));
+        // printf("Combining Left\n");
     }
     if (right_free) { 
-        newsize += GET_SIZE(HDPT(right));
+        new_size += GET_SIZE(HDPT(right));
+        // printf("Combining Right\n");
     }
-    
-    if (left_free)
-        PUT(HDPT(left), newsize);
-    else
-        PUT(HDPT(p), newsize);
 
-    if (right_free)
-        PUT(FTPT(right, GET_SIZE(HDPT(right))), newsize);
-    else
-        PUT(FTPT(p, size), newsize);
+    PUT(HDPT(p), PACK(new_size, 0));
+    PUT(FTPT(p, new_size), PACK(new_size, 0));
+    return;
+}
 
+
+void place(void *p, size_t size) {
+    // Split if size needed < size provided
+    if (size < GET_SIZE(HDPT(p))) {
+        split(p, size, GET_SIZE(HDPT(p)) - size);
+        // printf("Split Free Block\n");
+    }
+    SET_ALLOC(HDPT(p), 1);
+    SET_ALLOC(FTPT(p, size), 1);
+    // SET_ALLOC(FTPT(p, GET_SIZE(HDPT(p))), 1);
+}
+
+
+void split(void *p, size_t left_size, size_t right_size) {
+    char *next_block = NEXT_BLOCK(p, left_size);
+
+    // Split into left and right
+    PUT(HDPT(p), PACK(left_size, 0));
+    PUT(FTPT(p, left_size), PACK(left_size, 0));
+
+    PUT(HDPT(next_block), PACK(right_size, 0));
+    PUT(FTPT(next_block, right_size), PACK(right_size, 0));
     return;
 }
