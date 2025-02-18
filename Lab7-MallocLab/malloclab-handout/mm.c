@@ -141,7 +141,7 @@ void *mm_realloc(void *ptr, size_t size)
 {
     void *oldptr = ptr;
     void *newptr;
-    size_t copySize;
+    size_t copy_size;
     // Case 1, current block is enough
     if (ALIGN(size + 2 * SIZE_T_SIZE) <= GET_SIZE(HDPT(oldptr)))
         return oldptr;
@@ -155,13 +155,12 @@ void *mm_realloc(void *ptr, size_t size)
     // Case 3, call malloc
     newptr = mm_malloc(size);
     if (newptr == NULL)
-      return NULL;
-
+        return NULL;
     // Copy memory
-    copySize = *(size_t *)((char *)oldptr - SIZE_T_SIZE);
-    if (size < copySize)
-      copySize = size;
-    memcpy(newptr, oldptr, copySize);
+    copy_size = GET_SIZE(HDPT(oldptr));
+    if (size < copy_size)
+        copy_size = size;
+    memcpy(newptr, oldptr, copy_size);
     mm_free(oldptr);
 
     return newptr;
@@ -220,7 +219,9 @@ void coalesce(void *p) {
 
 // realloc coalesce - combine free neighbors
 void *realloc_coalesce(void *p, size_t size) {
+    void *old_p = p;
     size_t old_size = GET_SIZE(HDPT(p));
+    size_t copy_size;
     size_t new_size = old_size;
     char *left_footer = LFPT(p);
     char *right_header = HDPT(NEXT_BLOCK(p, old_size));
@@ -282,7 +283,16 @@ void *realloc_coalesce(void *p, size_t size) {
     // Combine and allocate
     PUT(HDPT(p), PACK(new_size, 1));
     PUT(FTPT(p, new_size), PACK(new_size, 1));
-    return p;
+
+    // If p changed (shifted to the left), we need to copy the memory
+    if (p != old_p) {
+        copy_size = old_size;
+        if (size < copy_size)
+            copy_size = size;
+        memcpy(p, old_p, copy_size);
+    }
+
+    return (void *) p;
 }
 
 
