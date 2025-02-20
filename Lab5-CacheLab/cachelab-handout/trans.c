@@ -9,6 +9,9 @@
  */ 
 #include <stdio.h>
 #include "cachelab.h"
+#include <math.h>
+
+#define k 16
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 
@@ -20,8 +23,113 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
  *     be graded. 
  */
 char transpose_submit_desc[] = "Transpose submission";
-void transpose_submit(int M, int N, int A[N][M], int B[M][N])
-{
+void transpose_submit(int M, int N, int A[N][M], int B[M][N]) {
+    int tmp[k][k], tmp_transpose[k][k];
+    int i, j, u,v;
+
+    // Slide a k x k temporary matrix along A
+    // Transpose each matrix, which can be done fast since the small k x k matrix will fit into the cache
+    // Copy the output of each transposed matrix to B
+
+    for (i = 0; i < N/k; i += 1) {
+        for (j = 0; j < M/k; j += 1) {
+            // Copy from A, A -> tmp
+            for (u = 0; u < k; u++) {
+                for (v = 0; v < k; v++) {
+                    tmp[u][v] = A[k*i + u][k*j + v];
+                }
+            }
+
+            // Transpose, tmp -> tmp_transpose
+            for (u = 0; u < k; u++) {
+                for (v = 0; v < k; v++) {
+                    tmp_transpose[v][u] = tmp[u][v];
+                }
+            }
+
+            // Copy to B, tmp_transpose -> B
+            for (v = 0; v < k; v++) {
+                for (u = 0; u < k; u++) {
+                    B[k*j + v][k*i + u] = tmp_transpose[v][u];
+                }
+            }
+        }
+    }
+
+    // Deal with bottom and right sides if they don't fit perfectly into the k x k matrix
+    if (k*i < N) {
+        for (j = 0; j < M/k; j += 1) {
+            // Copy from A, A -> tmp
+            for (u = 0; u < N - i*k; u++) {
+                for (v = 0; v < k; v++) {
+                    tmp[u][v] = A[k*i + u][k*j + v];
+                }
+            }
+
+            // Transpose, tmp -> tmp_transpose
+            for (u = 0; u < N - i*k; u++) {
+                for (v = 0; v < k; v++) {
+                    tmp_transpose[v][u] = tmp[u][v];
+                }
+            }
+
+            // Copy to B, tmp_transpose -> B
+            for (v = 0; v < k; v++) {
+                for (u = 0; u < N - i*k; u++) {
+                    B[k*j + v][k*i + u] = tmp_transpose[v][u];
+                }
+            }
+        }
+    }
+
+    if (k*j < M) {
+        for (i = 0; i < N/k; i += 1) {
+            // Copy from A, A -> tmp
+            for (u = 0; u < k; u++) {
+                for (v = 0; v < M - j*k; v++) {
+                    tmp[u][v] = A[k*i + u][k*j + v];
+                }
+            }
+
+            // Transpose, tmp -> tmp_transpose
+            for (u = 0; u < k; u++) {
+                for (v = 0; v < M - j*k; v++) {
+                    tmp_transpose[v][u] = tmp[u][v];
+                }
+            }
+
+            // Copy to B, tmp_transpose -> B
+            for (v = 0; v < M - j*k; v++) {
+                for (u = 0; u < k; u++) {
+                    B[k*j + v][k*i + u] = tmp_transpose[v][u];
+                }
+            }
+        }
+    }
+
+    // Bottom right edge
+    if (k*j < M || k*i < N) {
+        // Copy from A, A -> tmp
+        for (u = 0; u < N - i*k; u++) {
+            for (v = 0; v < M - j*k; v++) {
+                tmp[u][v] = A[k*i + u][k*j + v];
+            }
+        }
+
+        // Transpose, tmp -> tmp_transpose
+        for (u = 0; u < N - i*k; u++) {
+            for (v = 0; v < M - j*k; v++) {
+                tmp_transpose[v][u] = tmp[u][v];
+            }
+        }
+
+        // Copy to B, tmp_transpose -> B
+        for (v = 0; v < M - j*k; v++) {
+            for (u = 0; u < N - i*k; u++) {
+                B[k*j + v][k*i + u] = tmp_transpose[v][u];
+            }
+        }
+    }
 }
 
 /* 
