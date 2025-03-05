@@ -21,15 +21,17 @@ All labs are avaliable on the [cs:app website](https://csapp.cs.cmu.edu/).
 ![image](https://github.com/user-attachments/assets/32d5b758-6c2f-4136-bb24-7e72bdf50d9c)
 ![image](https://github.com/user-attachments/assets/bd3ef8cc-79cb-46a4-ad8a-e551fc8ad443)
 
-- [x] Lab 5 [**Cache Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab5-CacheLab) Students write a general-purpose cache simulator, and then optimize a small matrix transpose kernel to minimize the number of misses on a simulated cache. This lab uses the Valgrind tool to generate address traces.
+- [x] Lab 5 [**Cache Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab5-CacheLab): Students write a general-purpose cache simulator, and then optimize a small matrix transpose kernel to minimize the number of misses on a simulated cache. This lab uses the Valgrind tool to generate address traces.
 
 ![image](https://github.com/user-attachments/assets/b135fccf-6177-4621-a55f-f8ce7e6ef3dc)
 
-- [x] Lab 6 [**Shell Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab6-ShellLab) Students implement their own simple Unix shell program with job control, including the ctrl-c and ctrl-z keystrokes, fg, bg, and jobs commands. This is the students' first introduction to application level concurrency, and gives them a clear idea of Unix process control, signals, and signal handling.
+- [x] Lab 6 [**Shell Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab6-ShellLab): Students implement their own simple Unix shell program with job control, including the ctrl-c and ctrl-z keystrokes, fg, bg, and jobs commands. This is the students' first introduction to application level concurrency, and gives them a clear idea of Unix process control, signals, and signal handling.
 
 - [x] Lab 7 [**Malloc Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab7-MallocLab): Students implement their own versions of malloc, free, and realloc. This lab gives students a clear understanding of data layout and organization, and requires them to evaluate different trade-offs between space and time efficiency. One of our favorite labs. When students finish this one, they really understand pointers!
 
 ![image](https://github.com/user-attachments/assets/6bf60e9a-feca-4071-8401-8a3fe313d0ad)
 
 
-- [ ] [Proxy Lab]()
+- [x] Lab 8 [**Proxy Lab**](https://github.com/notDroid/CS-APP/tree/main/Lab8-ProxyLab): Students implement a concurrent caching Web proxy that sits between their browser and the rest of the World Wide Web. This lab exposes students to the interesting world of network programming, and ties together many of the concepts from the course, such as byte ordering, caching, process control, signals, signal handling, file I/O, concurrency, and synchronization.
+
+![image](https://github.com/user-attachments/assets/10d99b0c-a78a-4f73-87cd-3be79df2f006)
